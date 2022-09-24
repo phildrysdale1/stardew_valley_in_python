@@ -1,7 +1,9 @@
+## ========== Packages ========== ##
 import pygame, sys
 from settings import *
 from level import Level
 
+## ========== Classes ========== ##
 class Game:
 	def __init__(self):
 		pygame.init()
@@ -9,7 +11,7 @@ class Game:
 		pygame.display.set_caption('Sprout land')
 		self.clock = pygame.time.Clock()
 		self.level = Level()
-
+	## ========== Main game loop ========== ##
 	def run(self):
 		while True:
 			for event in pygame.event.get():
