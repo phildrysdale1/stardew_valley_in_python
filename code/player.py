@@ -25,14 +25,17 @@ class Player(pygame.sprite.Sprite):
 
         # timers
         self.timers = {
-            'tool use' : Timer(350, self.use_tool)
+            'tool use' : Timer(350, self.use_tool),
+            'tool switch' : Timer(200)
             }
         
         # tools
-        self.selected_tool = 'axe'
+        self.tools = ['hoe','axe','water']
+        self.tool_index = 0
+        self.selected_tool = self.tools[self.tool_index]
 
     def use_tool(self):
-        print(self.selected_tool)
+        pass
 
     def import_assets(self):
         self.animations = {'up' : [], 'down' : [], 'left' : [], 'right' : [],
@@ -43,7 +46,6 @@ class Player(pygame.sprite.Sprite):
         for animation in self.animations.keys():
             full_path = 'stardew_valley_in_python/graphics/character/' + animation
             self.animations[animation] = import_folder(full_path)
-        print(self.animations)
 
     def animate(self, dt):
         self.frame_index += 4 * dt
@@ -79,6 +81,14 @@ class Player(pygame.sprite.Sprite):
                 self.direction = pygame.math.Vector2()
                 self.frame_index = 0
 
+            # change tool
+            if keys[pygame.K_j] and not self.timers['tool switch'].active:
+                self.timers['tool switch'].activate()
+                if self.tool_index < len(self.tools) - 1: self.tool_index += 1  
+                else: self.tool_index = 0
+                self.selected_tool = self.tools[self.tool_index]
+                
+
 
     def get_status(self):
         # idle animation
@@ -106,7 +116,6 @@ class Player(pygame.sprite.Sprite):
         self.pos.y += self.direction.y * self.speed * dt
         self.rect.centery = self.pos.y
 
-            
     def update(self, dt):
         self.input()
         self.get_status()
