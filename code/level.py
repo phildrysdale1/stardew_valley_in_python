@@ -14,6 +14,7 @@ class Level:
 
 		# sprite groups
 		self.all_sprites = CameraGroup()
+		self.collision_sprites = pygame.sprite.Group()		
 
 		self.setup()
 		self.overlay = Overlay(self.player)
@@ -33,7 +34,7 @@ class Level:
 
 		# Fence
 		for x, y, surface in tmx_data.get_layer_by_name('Fence').tiles():
-			Generic((x * TILE_SIZE, y * TILE_SIZE), surface, self.all_sprites)
+			Generic((x * TILE_SIZE, y * TILE_SIZE), surface, [self.all_sprites, self.collision_sprites])
 
 		# Water
 		water_frames = import_folder('stardew_valley_in_python/graphics/water')
@@ -41,16 +42,21 @@ class Level:
 			Water((x * TILE_SIZE, y * TILE_SIZE), water_frames, self.all_sprites)
 		# Trees
 		for obj in tmx_data.get_layer_by_name('Trees'):
-			Tree((obj.x, obj.y), obj.image, self.all_sprites, obj.name)
+			Tree((obj.x, obj.y), obj.image, [self.all_sprites, self.collision_sprites], obj.name)
 
 		# Wildflowers
 		for obj in tmx_data.get_layer_by_name('Decoration'):
-			WildFlower((obj.x, obj.y), obj.image, self.all_sprites)
+			WildFlower((obj.x, obj.y), obj.image, [self.all_sprites, self.collision_sprites])
+
+		# Collision Tiles
+		for x, y, surface in tmx_data.get_layer_by_name('Collision').tiles():
+			Generic((x * TILE_SIZE, y * TILE_SIZE), pygame.Surface((TILE_SIZE, TILE_SIZE)), self.collision_sprites)
 
 
-
-		# create player
-		self.player = Player((640,360), self.all_sprites)
+		# player
+		for obj in tmx_data.get_layer_by_name('Player'):
+			if obj.name == 'Start':
+				self.player = Player((obj.x,obj.y), self.all_sprites, self.collision_sprites)
 
 		# Create Ground
 		Generic(pos = (0,0), 
@@ -74,13 +80,11 @@ class CameraGroup(pygame.sprite.Group):
 	def custom_draw(self, player):
 		self.offset.x = player.rect.centerx - SCREEN_WIDTH / 2
 		self.offset.y = player.rect.centery - SCREEN_HEIGHT / 2
+
 		for layer in LAYERS.values():
 			for sprite in sorted(self.sprites(), key = lambda sprite: sprite.rect.centery):
 				if sprite.z == layer:
 					offset_rect = sprite.rect.copy()
 					offset_rect.center -= self.offset
 					self.display_surface.blit(sprite.image, offset_rect)
-		
-
-
 		 
