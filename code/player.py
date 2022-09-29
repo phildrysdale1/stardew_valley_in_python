@@ -7,7 +7,7 @@ from timer import Timer
 ## ========== Classes ========== ##
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, group, collision_sprites):
+    def __init__(self, pos, group, collision_sprites, tree_sprites):
         super().__init__(group)
 
         self.import_assets()
@@ -47,8 +47,23 @@ class Player(pygame.sprite.Sprite):
         self.seed_index = 0
         self.selected_seed = self.seeds[self.seed_index]
 
+        # interaction
+        self.tree_sprites = tree_sprites
+
     def use_tool(self):
-        pass
+        if self.selected_tool == 'hoe':
+            pass
+        if self.selected_tool == 'axe':
+            for tree in self.tree_sprites.sprites():
+                if tree.rect.collidepoint(self.target_pos):
+                    tree.damage()
+            
+
+        if self.selected_tool == 'water':
+            pass
+    
+    def get_target_pos(self):
+        self.target_pos = self.rect.center + PLAYER_TOOL_OFFSET[self.status.split('_')[0]]
 
     def use_seed(self):
         pass
@@ -150,13 +165,12 @@ class Player(pygame.sprite.Sprite):
 
                     # vertical
                     if direction == 'vertical':
-                        if self.direction.y > 0: # moving up
+                        if self.direction.y > 0: # moving down
                             self.hitbox.bottom = sprite.hitbox.top
-                        if self.direction.y < 0: # moving down
+                        if self.direction.y < 0: # moving up
                             self.hitbox.top = sprite.hitbox.bottom
                         self.rect.centery = self.hitbox.centery
                         self.pos.y = self.hitbox.centery
-
 
     def move(self, dt):
         # normalising the vector
@@ -178,6 +192,7 @@ class Player(pygame.sprite.Sprite):
     def update(self, dt):
         self.input()
         self.get_status()
+        self.update_timers()
+        self.get_target_pos()
         self.move(dt)
         self.animate(dt)
-        self.update_timers()
